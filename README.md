@@ -74,9 +74,9 @@ A simple example of usage:
 	}
 
 	int main(){
-		auto s = make_safe(2l); // or use: safe_long s = 2;
+		auto s = make_safe(3l); // or use: safe_long s = 2;
 
-		if(factorial(s)==4l){
+		if(factorial(s)==6l){
 			std::cout << "Everything is fine.\n";
 		} else {
 			std::cout << "There is something wrong!\n"
