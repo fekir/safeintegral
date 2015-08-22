@@ -1,0 +1,81 @@
+##########################################################
+# GCC Compiler Options/settings                          #
+##########################################################
+option(EFFCXX     "Enable Effective C++ Warnings" OFF)
+option(SANTHREAD  "Enable sanitizer for threads" OFF)
+option(SANLEAK    "Enable sanitizer for leaks" OFF)
+option(SANADD     "Enable sanitizer for addresses" OFF)
+option(SANUNDEF   "Enable sanitizer for UB" OFF)
+option(BOUNDCHECK "Enable bound checking" OFF)
+option(PROFILE    "Enable profiling" OFF)
+option(FORTIFY    "Enable fortify sources" OFF)
+
+# language: c++11
+set(LANG_FLAG "-std=c++11")
+# default warning + errors
+set(WARN_FLAGS "${WARN_FLAGS} -Wall -Wextra -pedantic -Wmain -Wunreachable-code -Wunknown-pragmas")
+# multiple declarations, shadowing, undef warnings
+set(WARN_FLAGS "${WARN_FLAGS} -Wundef -Wredundant-decls -Wshadow")
+# switch warnings
+set(WARN_FLAGS "${WARN_FLAGS} -Wswitch-default -Wswitch-enum")
+# class/structs warnings
+set(WARN_FLAGS "${WARN_FLAGS} -Wnon-virtual-dtor -Wctor-dtor-privacy -Werror=non-virtual-dtor -Wreorder -Winit-self")
+# nullptr and casts warnings
+set(WARN_FLAGS "${WARN_FLAGS} -Wzero-as-null-pointer-constant -Wold-style-cast  -Werror=format-security -Wcast-align -Wuseless-cast")
+# arithmetic/numeric warnings
+set(WARN_FLAGS "${WARN_FLAGS} -Wfloat-equal -Werror=sign-compare -Wconversion -Wsign-promo")
+# project structure
+set(WARN_FLAGS "${WARN_FLAGS} -Wmissing-include-dirs")
+# logical operations
+set(WARN_FLAGS "${WARN_FLAGS} -Wlogical-op")
+# trap/sanitizer settings
+set(SAN_FLAGS "${SAN_FLAGS}  -ftrapv -fstack-check -fstack-protector")
+
+# errors
+set(ERR_FLAGS "${ERR_FLAGS} -Wformat-security")
+
+# debug
+#set(DEBUG_FLAGS "${DEBUG_FLAGS} -g3 ")
+
+#optimization
+#set(OPT_FLAGS "${OPT_FLAGS} -O0")
+
+if(EFFCXX)
+	message(" ===== Adding Effective C++ Warnings")
+	set(WARN_FLAGS "${WARN_FLAGS} -Weffc++}")
+endif()
+# queste opzioni sono separate perchè non tutte compatibili e disponibili in gcc...
+if(SANTHREAD)
+	message(" ===== Enable sanitizer for threads")
+	set(SAN_FLAGS "${SAN_FLAGS} -fsanitize=thread")
+endif()
+if(SANLEAK)
+	message(" ===== Enable sanitizer for leaks")
+	set(SAN_FLAGS "${SAN_FLAGS} -fsanitize=leaks")
+endif()
+if(SANADD)
+	message(" ===== Enable sanitizer for addresses")
+	set(SAN_FLAGS "${SAN_FLAGS} -fsanitize=address")
+endif()
+if(SANUNDEF)
+	message(" ===== Enable sanitizer for UB")
+	set(SAN_FLAGS "${SAN_FLAGS} -fsanitize=undefined")
+endif()
+if(BOUNDCHECK)
+	message(" ===== Enable sanitizer for bounds")
+	set(SAN_FLAGS "${SAN_FLAGS} -fcheck-pointer-bounds")
+endif()
+if(PROFILE)
+	message(" ===== Enable profiling")
+	set(PROF_FLAGS "${PROF_FLAGS} -pg")
+endif()
+if(FORTIFY)
+	message(" ===== Enable fortify sources")
+	add_definitions(-D_FORTIFY_SOURCE=2)
+	#set(OPT_FLAGS "${OPT_FLAGS} -O") #deve essere almeno O/O1
+endif()
+# compile for debug: cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+# test portabilty:-funsigned-char, -fsigned-char
+##########################################################
+
