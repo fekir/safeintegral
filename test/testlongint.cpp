@@ -2,6 +2,8 @@
 
 #include "../safeintegral/safeintegral.hpp"
 
+#include <cstdint>
+
 constexpr auto s11 = make_safe(14);
 constexpr auto s21 = make_safe(2);
 static_assert(s11 + s21 == 16, "");
@@ -15,7 +17,6 @@ template < class T >
 constexpr T factorial(T n) {
 	return (n <= 1 ? 1 : n * factorial(n - 1));
 }
-
 
 // First two test for profiling
 TEST_CASE( "Factorial of long int", "[factorial1][hide]" ) {
@@ -275,8 +276,7 @@ TEST_CASE( "bitwise op<< (negative)", "[negative]" ) {
 }
 
 TEST_CASE( "bitwise op<< (negative) 2", "[negative]" ) {
-	auto i = 1l;
-	auto s = make_safe(i);
+	auto s = make_safe<int64_t>(1);
 	REQUIRE_NOTHROW(s<<62l);
 	REQUIRE_THROWS_AS(s<<63l, std::out_of_range);
 }
@@ -284,17 +284,17 @@ TEST_CASE( "bitwise op<< (negative) 2", "[negative]" ) {
 TEST_CASE( "bitwise op>>", "[positive]" ) {
 	auto i = 2l;
 	auto s = make_safe(i);
-	REQUIRE(getvalue(s<<2l) == (i<<2l));
+	REQUIRE(getvalue(s>>2l) == (i>>2l));
 }
 
 TEST_CASE( "bitwise op>> (negative)", "[negative]" ) {
 	auto i = -2l;
 	auto s = make_safe(i);
-	REQUIRE_THROWS_AS(s<<2l, std::out_of_range);
+	REQUIRE_THROWS_AS(s>>2l, std::out_of_range);
 }
 
 TEST_CASE( "bitwise op>> (negative) 2", "[negative]" ) {
 	auto i = 2l;
 	auto s = make_safe(i);
-	REQUIRE_THROWS_AS(s<<-2l, std::out_of_range);
+	REQUIRE_THROWS_AS(s>>-2l, std::out_of_range);
 }
