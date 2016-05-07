@@ -38,12 +38,12 @@ inputs, the result would not be in range
 
 So you should change your function to:
 
-	errotype doublethevalue(int& a){
+	errortype doublethevalue(int& a){
 		if(a>max/2){
 			return errortype::tobig;
 		}
 		a*=2;
-	return errortype::noerror;
+		return errortype::noerror;
 	}
 
 but then, every time you want to do some operations, you would have to check if the operation is supported or not.
@@ -61,7 +61,7 @@ functions instead of using all the normal arithmetic operators.
 
 That's why this project provides functions to detect if in an operation will occur undefined behaviour and a
 safeintegral class. The ladder has implemented all arithmetic and binary operators, which will throw exceptions
-in the case an overflow would occur.
+in the case an overflow, undefined behaviour or implementation-defined behaviour would occur.
 
 A simple example of usage:
 
