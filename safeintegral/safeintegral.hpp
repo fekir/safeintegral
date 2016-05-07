@@ -30,18 +30,18 @@
 	private:
 		T m;
 	public:
-		/// Returns the value rappresented by the class as integral
+		/// Returns the value represented by the class as integral
 		constexpr T getvalue() const noexcept {
 			return m;
 		}
 
-		/// Returns the value rappresented by the class as integral
+		/// Returns the value represented by the class as integral
 		constexpr friend T getvalue(const safe_integral s) noexcept {
 			return s.m;
 		}
 
 		/// Default constructor
-		/// Wraps an integral ot type T
+		/// Wraps an integral of type T
 		/// The value is initialized to 0.
 		/// You can disable this initialization defining the macro DONT_INIT_DEFAULT_CONSTRUCTOR_SAFEINTEGRAL
 		/// It may(!) increase performance if creating vectors with many values
@@ -56,7 +56,7 @@
 		#endif
 		{};
 		//template<typename U>
-		//safe_integral(U) = delete; // we do not want implicit conversion --> but we need them for generig algorithm...
+		//safe_integral(U) = delete; // we do not want implicit conversion --> but we need them for generic algorithms ...
 
 		/// Constructor
 		/// Wraps an integral ot type T
@@ -189,7 +189,7 @@
 			this->m %= rhs.m;
 			return *this;
 		}
-		
+
 		/// Operator >>=
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @param rhs element to shift with the current element
@@ -221,7 +221,7 @@
 			operator++(); // pre-increment
 			return tmp;   // return old value
 		}
-		
+
 		/// Operator -- (predecrement)
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @out       the current element, lesser by one unit
@@ -255,7 +255,7 @@
 		///		assert(i == safe_integral<int>(5));
 		/// @endcode
 		constexpr safe_integral operator+() const noexcept { return *this; }
-		
+
 		/// Operator +
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		///
