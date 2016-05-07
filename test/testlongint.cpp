@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include "../safeintegral/safeintegral.hpp"
+#include "../safeintegral/safeintegralop.hpp"
 
 #include <cstdint>
 
@@ -11,6 +12,8 @@ static_assert(s11 - s21 == 12, "");
 static_assert(s11 * s21 == 28, "");
 static_assert(s11 / s21 == 7, "");
 static_assert(s11 % s21 == 0, "");
+static_assert(safeintegralop::precision<int64_t>() == 63, "");
+static_assert(safeintegralop::precision<uint64_t>() == 64, "");
 
 
 template < class T >
@@ -19,17 +22,21 @@ constexpr T factorial(T n) {
 }
 
 // First two test for profiling
-TEST_CASE( "Factorial of long int", "[factorial1][hide]" ) {
-	auto c = 20l;
-	for(int i =0; i<900000; ++i) {
-		REQUIRE(factorial(c) == 2432902008176640000l);
+// notice that the optimizer may be able to see that the function factorial and the class safe_integral are pure, elide all the call except the first one, and reuse the same result for the REQUIRE macro
+// on my PC (release build, 64 bit mode) the time is roughly the same, ca 25 seconds
+const auto bignum = 2000000;
+const int64_t factorial_of_20 = 2432902008176640000;
+TEST_CASE( "Factorial of int64_t", "[factorial][.]" ) {
+	const int64_t c = 20;
+	for(int i = 0; i != bignum; ++i) {
+		REQUIRE(factorial(c) == factorial_of_20);
 	}
 }
 
-TEST_CASE( "Factorial of safenum<long int>", "[factorial2][hide]" ) {
-	auto c = make_safe(20l);
-	for(int i =0; i<900000; ++i) {
-		REQUIRE(factorial(c).getvalue() == 2432902008176640000l);
+TEST_CASE( "Factorial of safenum<int64_t>", "[factorial][.]" ) {
+	const auto c = make_safe<int64_t>(20);
+	for(int i = 0; i != bignum; ++i) {
+		REQUIRE(factorial(c).getvalue() == factorial_of_20);
 	}
 }
 
@@ -275,10 +282,10 @@ TEST_CASE( "bitwise op<< (negative)", "[negative]" ) {
 	REQUIRE_THROWS_AS(s<<2l, std::out_of_range);
 }
 
-TEST_CASE( "bitwise op<< (negative) 2", "[negative]" ) {
+TEST_CASE("bitwise op<< (negative) 2", "[negative]") {
 	auto s = make_safe<int64_t>(1);
-	REQUIRE_NOTHROW(s<<62l);
-	REQUIRE_THROWS_AS(s<<63l, std::out_of_range);
+	REQUIRE_NOTHROW(s << 62l);
+	REQUIRE_THROWS_AS(s << 63l, std::out_of_range);
 }
 
 TEST_CASE( "bitwise op>>", "[positive]" ) {
