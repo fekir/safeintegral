@@ -166,9 +166,9 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeRightShift_signed(const T, const T b) noexcept {
+		constexpr bool isSafeRightShift_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			return (b >= T{0});
+			return (b >= T{0} && a >= T{0});
 		}
 	} // end details
 
