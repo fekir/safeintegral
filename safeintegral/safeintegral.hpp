@@ -391,7 +391,6 @@
 			return !(lhs == rhs);
 		}
 
-		// print operators
 		friend std::ostream &operator<<(std::ostream &os, const safe_integral<T> &value) {
 			os << value.m;
 			return os;
