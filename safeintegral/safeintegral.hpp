@@ -23,10 +23,10 @@
 #include <type_traits>
 #include <stdexcept>
 
-	/// This class rappresents an integral ot type T, that has no undefined behaviour. If an unsupported operation should
-	// occur (like division by 0), or an overflow, an exception is throw.
-	template<typename T, class = typename std::enable_if<std::is_integral<T>::value>::type>
-	class safe_integral {
+    /// This class rappresents an integral ot type T, that has no undefined behaviour. If an unsupported operation should
+    // occur (like division by 0), or an overflow, an exception is throw.
+    template<typename T, class = typename std::enable_if<std::is_integral<T>::value>::type>
+    class safe_integral {
 	private:
 		T m;
 	public:
@@ -49,12 +49,11 @@
 		/// @code
 		/// 	safe_integral<int> i;;
 		/// @endcode
-		safe_integral():
-		#if defined( DONT_INIT_DEFAULT_CONSTRUCTOR_SAFEINTEGRAL )
-		#else
-			m(T{0})
-		#endif
-		{};
+#if defined( DONT_INIT_DEFAULT_CONSTRUCTOR_SAFEINTEGRAL )
+		constexpr safe_integral() noexcept{}
+#else
+		constexpr safe_integral() noexcept : m(T{0}){}
+#endif
 		//template<typename U>
 		//safe_integral(U) = delete; // we do not want implicit conversion --> but we need them for generic algorithms ...
 
@@ -95,7 +94,7 @@
 		/// 	assert(i  == safe_integral<int>(7));
 		/// @endcode
 		safe_integral &operator+=(const safe_integral rhs) {
-			if (!safeintegralop::isSafeAdd(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_add(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator+=");
 			}
 			this->m += rhs.m;
@@ -114,7 +113,7 @@
 		/// 	assert(i  == safe_integral<int>(3));
 		/// @endcode
 		safe_integral &operator-=(const safe_integral rhs) {
-			if (!safeintegralop::isSafeDiff(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_diff(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator-=");
 			}
 			this->m -= rhs.m;
@@ -133,7 +132,7 @@
 		/// 	assert(i  == safe_integral<int>(10));
 		/// @endcode
 		safe_integral &operator*=(const safe_integral rhs) {
-			if (!safeintegralop::isSafeMult(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_mult(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator*=");
 			}
 			this->m *= rhs.m;
@@ -152,7 +151,7 @@
 		/// 	assert(i  == safe_integral<int>(2));
 		/// @endcode
 		safe_integral &operator/=(const safe_integral rhs) {
-			if (!safeintegralop::isSafeDiv(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_div(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator/=");
 			}
 			this->m /= rhs.m;
@@ -171,7 +170,7 @@
 		/// 	assert(i  == safe_integral<int>(1));
 		/// @endcode
 		safe_integral &operator%=(const safe_integral rhs) {
-			if (!safeintegralop::isSafeMod(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_mod(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator%=");
 			}
 			this->m %= rhs.m;
@@ -183,7 +182,7 @@
 		/// @param rhs element to shift with the current element
 		/// @out       reference to current element
 		safe_integral &operator<<=(const safe_integral &rhs) {
-			if (!safeintegralop::isSafeLeftShift(this->m, rhs.m)) {
+			if (!safeintegralop::is_safe_leftshift(this->m, rhs.m)) {
 				throw std::out_of_range("overflow with operator<<=");
 			}
 			this->m %= rhs.m;
@@ -203,7 +202,7 @@
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @out       the current element, bigger by one unit
 		safe_integral &operator++() {
-			if (!safeintegralop::isSafeAdd(this->m, T{1})) {
+			if (!safeintegralop::is_safe_add(this->m, T{1})) {
 				throw std::out_of_range("overflow with operator++()");
 			}
 			++this->m;
@@ -214,7 +213,7 @@
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @out       the current element, bigger by one unit
 		safe_integral operator++(int) {
-			if (!safeintegralop::isSafeAdd(this->m, T{1})) {
+			if (!safeintegralop::is_safe_add(this->m, T{1})) {
 				throw std::out_of_range("overflow with operator++(int)");
 			}
 			safe_integral tmp(*this); // copy
@@ -226,7 +225,7 @@
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @out       the current element, lesser by one unit
 		safe_integral operator--() {
-			if (!safeintegralop::isSafeDiff(this->m, T{1})) {
+			if (!safeintegralop::is_safe_diff(this->m, T{1})) {
 				throw std::out_of_range("overflow with operator--()");
 			}
 			--this->m;
@@ -237,7 +236,7 @@
 		/// If the operation is not safe (in case of overlow), an exception is thrown
 		/// @out       the current element, lesser by one unit
 		safe_integral operator--(int) {
-			if (!safeintegralop::isSafeDiff(this->m, T{1})) {
+			if (!safeintegralop::is_safe_diff(this->m, T{1})) {
 				throw std::out_of_range("overflow with operator--(int)");
 			}
 			safe_integral tmp(*this); // copy
@@ -267,8 +266,8 @@
 		/// @endcode
 		constexpr safe_integral operator-() const {
 			return
-				safeintegralop::isSafeDiff(0, this->m) ? safe_integral(-this->m) :
-				throw std::out_of_range("overflow with unary operator-");
+			    safeintegralop::is_safe_diff(0, this->m) ? safe_integral(-this->m) :
+			    throw std::out_of_range("overflow with unary operator-");
 		}
 
 		/// Operator +
@@ -281,8 +280,8 @@
 		/// @endcode
 		constexpr friend safe_integral operator+(safe_integral lhs, const safe_integral &rhs) {
 			return
-				safeintegralop::isSafeAdd(lhs.m, rhs.m) ? safe_integral(lhs.m + rhs.m) :
-				throw std::out_of_range("overflow with operator+");
+			    safeintegralop::is_safe_add(lhs.m, rhs.m) ? safe_integral(lhs.m + rhs.m) :
+			    throw std::out_of_range("overflow with operator+");
 		}
 
 		/// Operator -
@@ -295,8 +294,8 @@
 		/// @endcode
 		constexpr friend safe_integral operator-(safe_integral lhs, const safe_integral &rhs) {
 			return
-				safeintegralop::isSafeDiff(lhs.m, rhs.m) ? safe_integral(lhs.m - rhs.m) :
-				throw std::out_of_range("overflow with operator-");
+			    safeintegralop::is_safe_diff(lhs.m, rhs.m) ? safe_integral(lhs.m - rhs.m) :
+			    throw std::out_of_range("overflow with operator-");
 		}
 
 		/// Operator /
@@ -309,8 +308,8 @@
 		/// @endcode
 		constexpr friend safe_integral operator/(safe_integral lhs, const safe_integral &rhs) {
 			return
-				safeintegralop::isSafeDiv(lhs.m, rhs.m) ? safe_integral(lhs.m / rhs.m) :
-				throw std::out_of_range("overflow with operator/");
+			    safeintegralop::is_safe_div(lhs.m, rhs.m) ? safe_integral(lhs.m / rhs.m) :
+			    throw std::out_of_range("overflow with operator/");
 		}
 
 		/// Operator *
@@ -322,8 +321,8 @@
 		///		assert(i == safe_integral<int>(25));
 		/// @endcode
 		constexpr friend safe_integral operator*(safe_integral lhs, const safe_integral &rhs) {
-			return safeintegralop::isSafeMult(lhs.m, rhs.m) ? safe_integral(lhs.m * rhs.m) :
-					 throw std::out_of_range("overflow with operator*");
+			return safeintegralop::is_safe_mult(lhs.m, rhs.m) ? safe_integral(lhs.m * rhs.m) :
+			         throw std::out_of_range("overflow with operator*");
 		}
 
 		/// Operator %
@@ -335,8 +334,8 @@
 		///		assert(i == safe_integral<int>(0));
 		/// @endcode
 		constexpr friend safe_integral operator%(safe_integral lhs, const safe_integral &rhs) {
-			return safeintegralop::isSafeMod(lhs.m, rhs.m) ? safe_integral(lhs.m % rhs.m) :
-					 throw std::out_of_range("overflow with operator%");
+			return safeintegralop::is_safe_mod(lhs.m, rhs.m) ? safe_integral(lhs.m % rhs.m) :
+			         throw std::out_of_range("overflow with operator%");
 		}
 
 		constexpr safe_integral operator~() const noexcept {
@@ -357,14 +356,14 @@
 
 		constexpr friend safe_integral operator<<(safe_integral lhs, const safe_integral &rhs) {
 			return
-				safeintegralop::isSafeLeftShift(lhs.m, rhs.m) ? safe_integral(lhs.m << rhs.m) :
-				throw std::out_of_range("overflow with operator<<");
+			    safeintegralop::is_safe_leftshift(lhs.m, rhs.m) ? safe_integral(lhs.m << rhs.m) :
+			    throw std::out_of_range("overflow with operator<<");
 		}
 
 		constexpr friend safe_integral operator>>(safe_integral lhs, const safe_integral &rhs) {
 			return
-				safeintegralop::isSafeRightShift(lhs.m, rhs.m) ? safe_integral(lhs.m >> rhs.m) :
-				throw std::out_of_range("overflow with operator>>");
+			    safeintegralop::is_safe_rightshift(lhs.m, rhs.m) ? safe_integral(lhs.m >> rhs.m) :
+			    throw std::out_of_range("overflow with operator>>");
 		}
 
 		constexpr friend bool operator<(const safe_integral &lhs, const safe_integral &rhs) noexcept {

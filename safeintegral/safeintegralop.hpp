@@ -53,25 +53,25 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeAbs_unsigned(const T) noexcept {
+		constexpr bool is_safe_abs_unsigned(const T) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return true;
 		}
 
 		template <typename T>
-		constexpr bool isSafeAbs_signed(const T a) noexcept {
+		constexpr bool is_safe_abs_signed(const T a) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return (a != std::numeric_limits<T>::min());
 		}
 
 		template <typename T>
-		constexpr bool isSafeAdd_unsigned(const T a, const T b) noexcept {
+		constexpr bool is_safe_add_unsigned(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return (b == T{0}) || (a <= std::numeric_limits<T>::max() - b);
 		}
 
 		template <typename T>
-		constexpr bool isSafeAdd_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_add_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (b == T{0}) ? true :
@@ -80,13 +80,13 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeDiff_unsigned(const T a, const T b) noexcept {
+		constexpr bool is_safe_diff_unsigned(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return a >= b;
 		}
 
 		template <typename T>
-		constexpr bool isSafeDiff_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_diff_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (b == T{0}) ? true :
@@ -95,19 +95,19 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeMod_unsigned(const T, const T b) noexcept {
+		constexpr bool is_safe_mod_unsigned(const T, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return b!=T{0};
 		}
 
 		template <typename T>
-		constexpr bool isSafeMod_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_mod_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return (b == T{-1}) ? (a != std::numeric_limits<T>::min()) :  (b != T{0});
 		}
 
 		template <typename T>
-		constexpr bool isSafeMult_unsigned(const T a, const T b) noexcept {
+		constexpr bool is_safe_mult_unsigned(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
@@ -116,7 +116,7 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeMult_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_mult_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
@@ -126,7 +126,7 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeDiv_unsigned(const T a, const T b) noexcept {
+		constexpr bool is_safe_div_unsigned(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (a == T{0} || b == T{1}) ? true :
@@ -136,7 +136,7 @@ namespace safeintegralop {
 		}
 
 		template <typename T>
-		constexpr bool isSafeDiv_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_div_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return
 			    (a == T{0} || b == T{1}) ? true :
@@ -148,25 +148,25 @@ namespace safeintegralop {
 
 
 		template <typename T>
-		constexpr bool isSafeLeftShift_unsigned(const T a, const T b) noexcept {
+		constexpr bool is_safe_leftshift_unsigned(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return !( b >= precision<T>() || (a > (std::numeric_limits<T>::max() >> b)) );
 		}
 
 		template <typename T>
-		constexpr bool isSafeLeftShift_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_leftshift_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return !( (a < T{0}) || (b < T{0}) || (b >= precision<T>()) || (a > (std::numeric_limits<T>::max() >> b)));
 		}
 
 		template <typename T>
-		constexpr bool isSafeRightShift_unsigned(const T, const T) noexcept {
+		constexpr bool is_safe_rightshift_unsigned(const T, const T) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return true;
 		}
 
 		template <typename T>
-		constexpr bool isSafeRightShift_signed(const T a, const T b) noexcept {
+		constexpr bool is_safe_rightshift_signed(const T a, const T b) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			return (b >= T{0} && a >= T{0});
 		}
@@ -284,58 +284,58 @@ namespace safeintegralop {
 
 	/// This function checks if calculating the absolute value (i.e. abs(a) ) will overflow
 	template <typename T>
-	constexpr bool isSafeAbs(const T a) noexcept {
+	constexpr bool is_safe_abs(const T a) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeAbs_unsigned(a) : details::isSafeAbs_signed(a);
+		return std::is_unsigned<T>::value ? details::is_safe_abs_unsigned(a) : details::is_safe_abs_signed(a);
 	}
 
 	/// This function checks if the addition two integral values (i.e. a+b ) will overflow
 	template <typename T>
-	constexpr bool isSafeAdd(const T a, const T b) noexcept {
+	constexpr bool is_safe_add(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeAdd_unsigned(a, b) : details::isSafeAdd_signed(a, b);
+		return std::is_unsigned<T>::value ? details::is_safe_add_unsigned(a, b) : details::is_safe_add_signed(a, b);
 	}
 
 	/// This function checks if the subtraction of one integral values from another (i.e. a-b ) will overflow
 	template <typename T>
-	constexpr bool isSafeDiff(const T a, const T b) noexcept {
+	constexpr bool is_safe_diff(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeDiff_unsigned(a, b) : details::isSafeDiff_signed(a, b);
+		return std::is_unsigned<T>::value ? details::is_safe_diff_unsigned(a, b) : details::is_safe_diff_signed(a, b);
 	}
 
 	/// This function checks if calculating the remainder of two integral values (i.e. a%b ) will overflow, and if the arguments are valid (i.e. b != 0)
 	template <typename T>
-	constexpr bool isSafeMod(const T a, const T b) noexcept {
+	constexpr bool is_safe_mod(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeMod_unsigned(a, b) : details::isSafeMod_signed(a, b);
+		return std::is_unsigned<T>::value ? details::is_safe_mod_unsigned(a, b) : details::is_safe_mod_signed(a, b);
 	}
 
 	/// This function checks if the multiplication of two integral values (i.e. a*b ) will overflow
 	template <typename T>
-	constexpr bool isSafeMult(const T a, const T b) noexcept {
+	constexpr bool is_safe_mult(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeMult_unsigned(a,b) : details::isSafeMult_signed(a,b);
+		return std::is_unsigned<T>::value ? details::is_safe_mult_unsigned(a,b) : details::is_safe_mult_signed(a,b);
 	}
 
 	/// This function checks if the division between two integral values (i.e. a/b ) will overflow, and if the arguments are valid (i.e. b != 0)
 	template <typename T>
-	constexpr bool isSafeDiv(const T a, const T b) noexcept {
+	constexpr bool is_safe_div(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeDiv_unsigned(a,b) : details::isSafeDiv_signed(a,b);
+		return std::is_unsigned<T>::value ? details::is_safe_div_unsigned(a,b) : details::is_safe_div_signed(a,b);
 	}
 
 	/// This function checks if the left shift between two integral values (i.e. a<<b ) will overflow, and if the arguments are valid (i.e. a>0 && b >0)
 	template <typename T>
-	constexpr bool isSafeLeftShift(const T a, const T b) noexcept {
+	constexpr bool is_safe_leftshift(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeLeftShift_unsigned(a,b) : details::isSafeLeftShift_signed(a,b);
+		return std::is_unsigned<T>::value ? details::is_safe_leftshift_unsigned(a,b) : details::is_safe_leftshift_signed(a,b);
 	}
 
 	/// This function checks if the arguments for the right shift operation between two integral values (i.e. a>>b ) are valid ( i.e. a>0 && b>0)
 	template <typename T>
-	constexpr bool isSafeRightShift(const T a, const T b) noexcept {
+	constexpr bool is_safe_rightshift(const T a, const T b) noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-		return std::is_unsigned<T>::value ? details::isSafeRightShift_unsigned(a,b) : details::isSafeRightShift_signed(a,b);
+		return std::is_unsigned<T>::value ? details::is_safe_rightshift_unsigned(a,b) : details::is_safe_rightshift_signed(a,b);
 	}
 
 	/// Usage:
