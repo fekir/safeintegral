@@ -19,13 +19,13 @@
 
 #include <limits>
 #include <type_traits>
-
+#include <cstdint>
 
 namespace safeintegralop {
 	enum class sign { negative = -1, zero = 0, positive = 1 };
 
 	template <typename T>
-	constexpr std::size_t precision();
+	constexpr std::size_t precision() noexcept;
 
 	// All functions in this namespace are for private use, you should use all the function outside of this namespace
 	namespace details{
@@ -40,10 +40,7 @@ namespace safeintegralop {
 		template <typename T>
 		constexpr sign signum_signed(const T x) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			return
-			    x > T{0} ? sign::positive :
-			    x < T{0} ? sign::negative :
-		        sign::zero; // x==T{0}
+			return x > T{0} ? sign::positive :x < T{0} ? sign::negative : sign::zero; // x==T{0}
 	    }
 
 	    template <class T>
@@ -149,14 +146,17 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_unsigned(const T a, const T b) noexcept {
+			using TU = typename std::make_unsigned<T>::type;
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			return !( b >= precision<T>() || (a > (std::numeric_limits<T>::max() >> b)) );
+			// cast to remove warning, even if this function is really called when T is unsigned
+			return !(static_cast<TU>(b) >= precision<T>() || (a > (std::numeric_limits<T>::max() >> b)) );
 		}
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_signed(const T a, const T b) noexcept {
+			using TU = typename std::make_unsigned<T>::type;
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			return !( (a < T{0}) || (b < T{0}) || (b >= precision<T>()) || (a > (std::numeric_limits<T>::max() >> b)));
+			return !( (a < T{0}) || (b < T{0}) || (static_cast<TU>(b) >= precision<T>()) || (a > (std::numeric_limits<T>::max() >> b)));
 		}
 
 		template <typename T>
@@ -176,7 +176,7 @@ namespace safeintegralop {
 		constexpr bool in_range_unsigned_unsigned(const T t) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
-			return (sizeof(T)>sizeof(R)) ?
+			return (precision<T>() > precision<R>()) ?
 			    (t < static_cast<T>(std::numeric_limits<R>::max())) :
 			    (static_cast<R>(t) <std::numeric_limits<R>::max());
 		}
@@ -185,7 +185,7 @@ namespace safeintegralop {
 		constexpr bool in_range_signed_signed(const T t) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
-			return (sizeof(T)>sizeof(R)) ?
+			return (precision<T>() > precision<R>()) ?
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
 			    (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::max());
 		}
@@ -195,7 +195,7 @@ namespace safeintegralop {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
 			return (t < T{ 0 }) ? false :
-			    (sizeof(T) / 2 <= sizeof(R)) ? true :
+			    (precision<T>() / 2 <= precision<R>()) ? true :
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()));
 		}
 
@@ -203,7 +203,7 @@ namespace safeintegralop {
 		constexpr bool in_range_unsigned_signed(const T t) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
-			return (sizeof(T) >= sizeof(R) / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
+			return (precision<T>() >= precision<R>() / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
 		}
 
 		template <typename R, typename T>
@@ -221,14 +221,14 @@ namespace safeintegralop {
 		constexpr bool cmp_equal_same_sign(const T t, const U u) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
-			return (sizeof(T)>sizeof(U)) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
+			return (precision<T>()>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_equal_signed_unsigned(const T t, const U u) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
-			return (t<T{ 0 }) ? false : (sizeof(T) / 2>sizeof(U)) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
+			return (t<T{ 0 }) ? false : (precision<T>() / 2>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		// equivalent of operator== for different integral types
@@ -236,21 +236,21 @@ namespace safeintegralop {
 		constexpr bool cmp_less_same_sign(const T t, const U u) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
-			return (sizeof(T)>sizeof(U)) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
+			return (precision<T>()>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_signed_unsigned(const T t, const U u) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
-			return (t<T{ 0 }) ? true : (sizeof(T) / 2>sizeof(U)) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
+			return (t<T{ 0 }) ? true : (precision<T>() / 2>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_unsigned_signed(const T t, const U u) noexcept {
 			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
-			return (u<U{ 0 }) ? false : (sizeof(U) / 2>sizeof(T)) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
+			return (u<U{ 0 }) ? false : (precision<U>() / 2>precision<T>()) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
 		}
     } // end details
 
@@ -277,7 +277,7 @@ namespace safeintegralop {
 	/// should not use the sizeof operator to compute the precision of an integer type on
 	/// architectures that use padding bits or in strictly conforming/portable programs.
 	template <typename T>
-	constexpr std::size_t precision(){
+	constexpr std::size_t precision() noexcept {
 		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return details::pop(0, std::numeric_limits<T>::max());
 	}
@@ -454,7 +454,6 @@ namespace safeintegralop {
 		static_assert(!cmp_less(std::numeric_limits<uint8_t>::max(), -1),
 		    "comparison unsigned/signed type");
 	}
-
 
 }
 
