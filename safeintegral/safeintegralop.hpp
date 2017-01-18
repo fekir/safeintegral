@@ -22,6 +22,7 @@
 #include <cstdint>
 
 namespace safeintegralop {
+
 	enum class sign { negative = -1, zero = 0, positive = 1 };
 
 	template <typename T>
@@ -30,46 +31,60 @@ namespace safeintegralop {
 	// All functions in this namespace are for private use, you should use all the function outside of this namespace
 	namespace details{
 
+#if defined(FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL) || defined(FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE)
+#error "FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL or FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE already defined"
+#endif
+#define FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL " needs to be an integral (not bool) value type"
+#define FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T) static_assert(is_integral_not_bool<T>(), #T FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL);
+
+		// Most operatio do not make sense on bool, even if the are considered integrals
+		template <typename T>
+		constexpr bool is_integral_not_bool(){
+			using value_type = typename std::remove_cv<T>::type;
+			return !std::is_same<value_type,bool>::value && std::is_integral<T>::value;
+		}
+
+
 		// Implementation for signum
 		template <typename T>
 		constexpr sign signum_unsigned(const T x) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return x > T{0} ? sign::positive : sign::zero;
 		}
 
 		template <typename T>
 		constexpr sign signum_signed(const T x) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			return x > T{0} ? sign::positive :x < T{0} ? sign::negative : sign::zero; // x==T{0}
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			return x > T{0} ? sign::positive :x < T{0} ? sign::negative : sign::zero;
 	    }
 
 	    template <class T>
 	    constexpr std::size_t pop(const std::size_t precision, const T num) {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return (num == T{0}) ? precision : pop(((num % 2 != 0) ? precision+1 : precision), num >> 1);
 		}
 
 		template <typename T>
 		constexpr bool is_safe_abs_unsigned(const T) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return true;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_abs_signed(const T a) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return (a != std::numeric_limits<T>::min());
 		}
 
 		template <typename T>
 		constexpr bool is_safe_add_unsigned(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return (b == T{0}) || (a <= std::numeric_limits<T>::max() - b);
 		}
 
 		template <typename T>
 		constexpr bool is_safe_add_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (b == T{0}) ? true :
 			    (b > T{0}) ? (a <= std::numeric_limits<T>::max() - b) :
@@ -78,13 +93,13 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_diff_unsigned(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return a >= b;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_diff_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (b == T{0}) ? true :
 			    (b > T{0}) ? (a >= std::numeric_limits<T>::min() + b) :
@@ -93,19 +108,19 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_mod_unsigned(const T, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return b!=T{0};
 		}
 
 		template <typename T>
 		constexpr bool is_safe_mod_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return (b == T{-1}) ? (a != std::numeric_limits<T>::min()) :  (b != T{0});
 		}
 
 		template <typename T>
 		constexpr bool is_safe_mult_unsigned(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
 			    (b < T{1}) ? true :
@@ -114,7 +129,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_mult_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
 			    (b==T{-1}) ? a != std::numeric_limits<T>::min() : // a/-1 == a*-1 --> overflow if a == minvalue
@@ -124,7 +139,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_div_unsigned(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (a == T{0} || b == T{1}) ? true :
 			    (b == T{0}) ? false :
@@ -134,7 +149,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_div_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return
 			    (a == T{0} || b == T{1}) ? true :
 			    (b == T{0}) ? false :
@@ -147,7 +162,7 @@ namespace safeintegralop {
 		template <typename T>
 		constexpr bool is_safe_leftshift_unsigned(const T a, const T b) noexcept {
 			using TU = typename std::make_unsigned<T>::type;
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			// cast to remove warning, even if this function is really called when T is unsigned
 			return !(static_cast<TU>(b) >= precision<T>() || (a > (std::numeric_limits<T>::max() >> b)) );
 		}
@@ -155,27 +170,27 @@ namespace safeintegralop {
 		template <typename T>
 		constexpr bool is_safe_leftshift_signed(const T a, const T b) noexcept {
 			using TU = typename std::make_unsigned<T>::type;
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return !( (a < T{0}) || (b < T{0}) || (static_cast<TU>(b) >= precision<T>()) || (a > (std::numeric_limits<T>::max() >> b)));
 		}
 
 		template <typename T>
 		constexpr bool is_safe_rightshift_unsigned(const T, const T) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return true;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_rightshift_signed(const T a, const T b) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return (b >= T{0} && a >= T{0});
 		}
 
 		// could use the same implementation of in_range_signed_signed, but compiler may generate warning that t is always bigger than 0
 		template <typename R, typename T>
 		constexpr bool in_range_unsigned_unsigned(const T t) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
 			return (precision<T>() > precision<R>()) ?
 			    (t < static_cast<T>(std::numeric_limits<R>::max())) :
 			    (static_cast<R>(t) <std::numeric_limits<R>::max());
@@ -183,8 +198,8 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_signed_signed(const T t) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
 			return (precision<T>() > precision<R>()) ?
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
 			    (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::max());
@@ -192,8 +207,8 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_signed_unsigned(const T t) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
 			return (t < T{ 0 }) ? false :
 			    (precision<T>() / 2 <= precision<R>()) ? true :
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()));
@@ -201,8 +216,8 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_unsigned_signed(const T t) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<R>::value, "R needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
 			return (precision<T>() >= precision<R>() / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
 		}
 
@@ -219,46 +234,48 @@ namespace safeintegralop {
 		// equivalent of operator== for different types
 		template <typename T, typename U>
 		constexpr bool cmp_equal_same_sign(const T t, const U u) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
 			return (precision<T>()>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_equal_signed_unsigned(const T t, const U u) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
 			return (t<T{ 0 }) ? false : (precision<T>() / 2>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		// equivalent of operator== for different integral types
 		template <typename T, typename U>
 		constexpr bool cmp_less_same_sign(const T t, const U u) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
 			return (precision<T>()>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_signed_unsigned(const T t, const U u) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
 			return (t<T{ 0 }) ? true : (precision<T>() / 2>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_unsigned_signed(const T t, const U u) noexcept {
-			static_assert(std::is_integral<T>::value, "T needs to be an integral value");
-			static_assert(std::is_integral<U>::value, "U needs to be an integral value");
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
 			return (u<U{ 0 }) ? false : (precision<U>() / 2>precision<T>()) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
 		}
+
+#undef FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL
+#undef FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE
     } // end details
 
     /// This function represents the signature function for integral values.
     /// This function returns a sign, i.e. if the value is greater, equal, or less zero.
     template <typename T>
     constexpr sign signum(const T x) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::signum_unsigned(x) : details::signum_signed(x);
 	}
 
@@ -278,28 +295,24 @@ namespace safeintegralop {
 	/// architectures that use padding bits or in strictly conforming/portable programs.
 	template <typename T>
 	constexpr std::size_t precision() noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return details::pop(0, std::numeric_limits<T>::max());
 	}
 
 	/// This function checks if calculating the absolute value (i.e. abs(a) ) will overflow
 	template <typename T>
 	constexpr bool is_safe_abs(const T a) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_abs_unsigned(a) : details::is_safe_abs_signed(a);
 	}
 
 	/// This function checks if the addition two integral values (i.e. a+b ) will overflow
 	template <typename T>
 	constexpr bool is_safe_add(const T a, const T b) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_add_unsigned(a, b) : details::is_safe_add_signed(a, b);
 	}
 
 	/// This function checks if the subtraction of one integral values from another (i.e. a-b ) will overflow
 	template <typename T>
 	constexpr bool is_safe_diff(const T a, const T b) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_diff_unsigned(a, b) : details::is_safe_diff_signed(a, b);
 	}
 
@@ -313,14 +326,12 @@ namespace safeintegralop {
 	/// This function checks if the multiplication of two integral values (i.e. a*b ) will overflow
 	template <typename T>
 	constexpr bool is_safe_mult(const T a, const T b) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_mult_unsigned(a,b) : details::is_safe_mult_signed(a,b);
 	}
 
 	/// This function checks if the division between two integral values (i.e. a/b ) will overflow, and if the arguments are valid (i.e. b != 0)
 	template <typename T>
 	constexpr bool is_safe_div(const T a, const T b) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_div_unsigned(a,b) : details::is_safe_div_signed(a,b);
 	}
 
@@ -334,7 +345,6 @@ namespace safeintegralop {
 	/// This function checks if the arguments for the right shift operation between two integral values (i.e. a>>b ) are valid ( i.e. a>0 && b>0)
 	template <typename T>
 	constexpr bool is_safe_rightshift(const T a, const T b) noexcept {
-		static_assert(std::is_integral<T>::value, "T needs to be an integral value");
 		return std::is_unsigned<T>::value ? details::is_safe_rightshift_unsigned(a,b) : details::is_safe_rightshift_signed(a,b);
 	}
 
