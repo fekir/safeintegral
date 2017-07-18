@@ -21,9 +21,7 @@ constexpr T factorial(T n) {
 	return (n <= 1 ? 1 : n * factorial(n - 1));
 }
 
-// First two test for profiling
-// notice that the optimizer may be able to see that the function factorial and the class safe_integral are pure, elide all the call except the first one, and reuse the same result for the REQUIRE macro
-// on my PC (release build, 64 bit mode) the time is roughly the same, ca 25 seconds
+// Simple profiling test
 const auto bignum = 2000000;
 const int64_t factorial_of_20 = 2432902008176640000;
 TEST_CASE( "Factorial of int64_t", "[factorial][.]" ) {
