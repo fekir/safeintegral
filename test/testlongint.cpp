@@ -12,8 +12,8 @@ static_assert(s11 - s21 == 12, "");
 static_assert(s11 * s21 == 28, "");
 static_assert(s11 / s21 == 7, "");
 static_assert(s11 % s21 == 0, "");
-static_assert(safeintegralop::precision<int64_t>() == 63, "");
-static_assert(safeintegralop::precision<uint64_t>() == 64, "");
+static_assert(std::numeric_limits<int64_t>::digits == 63, "");
+static_assert(std::numeric_limits<uint64_t>::digits == 64, "");
 
 
 template < class T >

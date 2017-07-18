@@ -25,9 +25,6 @@ namespace safeintegralop {
 
 	enum class sign { negative = -1, zero = 0, positive = 1 };
 
-	template <typename T>
-	constexpr std::size_t precision() noexcept;
-
 	// All functions in this namespace are for private use, you should use all the function outside of this namespace
 	namespace details{
 
@@ -57,12 +54,6 @@ namespace safeintegralop {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			return x > T{0} ? sign::positive :x < T{0} ? sign::negative : sign::zero;
 	    }
-
-	    template <class T>
-	    constexpr std::size_t pop(const std::size_t precision, const T num) {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
-			return (num == T{0}) ? precision : pop(((num % 2 != 0) ? precision+1 : precision), num >> 1);
-		}
 
 		template <typename T>
 		constexpr bool is_safe_abs_unsigned(const T) noexcept {
@@ -161,17 +152,14 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_unsigned(const T a, const T b) noexcept {
-			using TU = typename std::make_unsigned<T>::type;
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
-			// cast to remove warning, even if this function is really called when T is unsigned
-			return !(static_cast<TU>(b) >= precision<T>() || (a > (std::numeric_limits<T>::max() >> b)) );
+			return !(b >= static_cast<T>(std::numeric_limits<T>::digits) || (a > (std::numeric_limits<T>::max() >> b)) );
 		}
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_signed(const T a, const T b) noexcept {
-			using TU = typename std::make_unsigned<T>::type;
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
-			return !( (a < T{0}) || (b < T{0}) || (static_cast<TU>(b) >= precision<T>()) || (a > (std::numeric_limits<T>::max() >> b)));
+			return !( (a < T{0}) || (b < T{0}) || (b >= std::numeric_limits<T>::digits) || (a > (std::numeric_limits<T>::max() >> b)));
 		}
 
 		template <typename T>
@@ -191,7 +179,7 @@ namespace safeintegralop {
 		constexpr bool in_range_unsigned_unsigned(const T t) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
-			return (precision<T>() > precision<R>()) ?
+			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
 			    (t < static_cast<T>(std::numeric_limits<R>::max())) :
 			    (static_cast<R>(t) <std::numeric_limits<R>::max());
 		}
@@ -200,7 +188,7 @@ namespace safeintegralop {
 		constexpr bool in_range_signed_signed(const T t) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
-			return (precision<T>() > precision<R>()) ?
+			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
 			    (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::max());
 		}
@@ -210,7 +198,7 @@ namespace safeintegralop {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
 			return (t < T{ 0 }) ? false :
-			    (precision<T>() / 2 <= precision<R>()) ? true :
+			    (std::numeric_limits<T>::digits / 2 <= std::numeric_limits<R>::digits) ? true :
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()));
 		}
 
@@ -218,7 +206,7 @@ namespace safeintegralop {
 		constexpr bool in_range_unsigned_signed(const T t) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(R);
-			return (precision<T>() >= precision<R>() / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
+			return (std::numeric_limits<T>::digits >= std::numeric_limits<R>::digits / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
 		}
 
 		template <typename R, typename T>
@@ -236,14 +224,14 @@ namespace safeintegralop {
 		constexpr bool cmp_equal_same_sign(const T t, const U u) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
-			return (precision<T>()>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
+			return (std::numeric_limits<T>::digits>std::numeric_limits<U>::digits) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_equal_signed_unsigned(const T t, const U u) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
-			return (t<T{ 0 }) ? false : (precision<T>() / 2>precision<U>()) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
+			return (t<T{ 0 }) ? false : (std::numeric_limits<T>::digits / 2>std::numeric_limits<U>::digits) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		// equivalent of operator== for different integral types
@@ -251,21 +239,21 @@ namespace safeintegralop {
 		constexpr bool cmp_less_same_sign(const T t, const U u) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
-			return (precision<T>()>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
+			return (std::numeric_limits<T>::digits>std::numeric_limits<U>::digits) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_signed_unsigned(const T t, const U u) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
-			return (t<T{ 0 }) ? true : (precision<T>() / 2>precision<U>()) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
+			return (t<T{ 0 }) ? true : (std::numeric_limits<T>::digits / 2>std::numeric_limits<U>::digits) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_unsigned_signed(const T t, const U u) noexcept {
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
 			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(U);
-			return (u<U{ 0 }) ? false : (precision<U>() / 2>precision<T>()) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
+			return (u<U{ 0 }) ? false : (std::numeric_limits<U>::digits / 2>std::numeric_limits<T>::digits) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
 		}
 
 #undef FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL
@@ -277,25 +265,6 @@ namespace safeintegralop {
     template <typename T>
     constexpr sign signum(const T x) noexcept {
 		return std::is_unsigned<T>::value ? details::signum_unsigned(x) : details::signum_signed(x);
-	}
-
-	/// From SecureCoding:
-	/// Integer types in C have both a size and a precision. The size indicates
-	/// the number of bytes used by an object and can be retrieved for any object
-	/// or type using the sizeof operator.
-	/// The precision of an integer type is the number of bits it uses to
-	/// represent values, excluding any sign and padding bits.
-	///
-	/// Padding bits contribute to the integer's size, but not to its precision.
-	/// Consequently, inferring the precision of an integer type from its size may
-	/// result in too large a value, which can then lead to incorrect assumptions about
-	/// the numeric range of these types.
-	/// Programmers should use correct integer precisions in their code, and in particular,
-	/// should not use the sizeof operator to compute the precision of an integer type on
-	/// architectures that use padding bits or in strictly conforming/portable programs.
-	template <typename T>
-	constexpr std::size_t precision() noexcept {
-		return details::pop(0, std::numeric_limits<T>::max());
 	}
 
 	/// This function checks if calculating the absolute value (i.e. abs(a) ) will overflow
