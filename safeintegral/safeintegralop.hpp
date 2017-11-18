@@ -34,37 +34,37 @@ namespace safeintegralop {
 		// Implementation for signum
 		template <typename T>
 		constexpr sign signum_unsigned(const T x) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return x > T{0} ? sign::positive : sign::zero;
 		}
 
 		template <typename T>
 		constexpr sign signum_signed(const T x) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return x > T{0} ? sign::positive :x < T{0} ? sign::negative : sign::zero;
 	    }
 
 		template <typename T>
 		constexpr bool is_safe_abs_unsigned(const T) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return true;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_abs_signed(const T a) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return (a != std::numeric_limits<T>::min());
 		}
 
 		template <typename T>
 		constexpr bool is_safe_add_unsigned(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return (b == T{0}) || (a <= std::numeric_limits<T>::max() - b);
 		}
 
 		template <typename T>
 		constexpr bool is_safe_add_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (b == T{0}) ? true :
 			    (b > T{0}) ? (a <= std::numeric_limits<T>::max() - b) :
@@ -73,13 +73,13 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_diff_unsigned(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return a >= b;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_diff_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (b == T{0}) ? true :
 			    (b > T{0}) ? (a >= std::numeric_limits<T>::min() + b) :
@@ -88,19 +88,19 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_mod_unsigned(const T, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return b!=T{0};
 		}
 
 		template <typename T>
 		constexpr bool is_safe_mod_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return (b == T{-1}) ? (a != std::numeric_limits<T>::min()) :  (b != T{0});
 		}
 
 		template <typename T>
 		constexpr bool is_safe_mult_unsigned(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
 			    (b < T{1}) ? true :
@@ -109,7 +109,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_mult_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (a==T{0} || b== T{0} || b==T{1} || a == T{1}) ? true :
 			    (b==T{-1}) ? a != std::numeric_limits<T>::min() : // a/-1 == a*-1 --> overflow if a == minvalue
@@ -119,7 +119,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_div_unsigned(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (a == T{0} || b == T{1}) ? true :
 			    (b == T{0}) ? false :
@@ -129,7 +129,7 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_div_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return
 			    (a == T{0} || b == T{1}) ? true :
 			    (b == T{0}) ? false :
@@ -141,25 +141,25 @@ namespace safeintegralop {
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_unsigned(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return !(b >= static_cast<T>(std::numeric_limits<T>::digits) || (a > (std::numeric_limits<T>::max() >> b)) );
 		}
 
 		template <typename T>
 		constexpr bool is_safe_leftshift_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return !( (a < T{0}) || (b < T{0}) || (b >= std::numeric_limits<T>::digits) || (a > (std::numeric_limits<T>::max() >> b)));
 		}
 
 		template <typename T>
 		constexpr bool is_safe_rightshift_unsigned(const T, const T) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return true;
 		}
 
 		template <typename T>
 		constexpr bool is_safe_rightshift_signed(const T a, const T b) noexcept {
-			FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T);
+			FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T);
 			return (b >= T{0} && a >= T{0});
 		}
 

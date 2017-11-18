@@ -26,23 +26,26 @@ namespace safeintegralop {
 	// All functions in this namespace are for private use, you should use all the function outside of this namespace
 	namespace details{
 
-#define FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL " needs to be an integral (not bool) value type"
-#define FEK_ASSERT_INTEGRAL_NOT_BOOL_TYPE(T) static_assert(is_integral_not_bool<T>(), #T FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL)
-#define FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T, R) \
-	static_assert(is_integral_not_bool<T>(), #T FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL);\
-	static_assert(is_integral_not_bool<R>(), #R FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL)
+#define FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR " needs to be an integral (not bool or char/wchar_t) value type"
+#define FEK_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T) static_assert(is_integral_not_bool_char<T>(), #T FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
+#define FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T, R) \
+	static_assert(is_integral_not_bool_char<T>(), #T FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR);\
+	static_assert(is_integral_not_bool_char<R>(), #R FEK_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
 
 		// Most operatio do not make sense on bool, even if the are considered integrals
 		template <typename T>
-		constexpr bool is_integral_not_bool(){
+		constexpr bool is_integral_not_bool_char(){
 			using value_type = typename std::remove_cv<T>::type;
-			return !std::is_same<value_type,bool>::value && std::is_integral<T>::value;
+			return
+			    !std::is_same<value_type,bool>::value && !std::is_same<value_type,char>::value &&
+			    !std::is_same<value_type,char16_t>::value && !std::is_same<value_type,char32_t>::value &&
+			    !std::is_same<value_type,wchar_t>::value && std::is_integral<T>::value;
 		}
 
 		// could use the same implementation of in_range_signed_signed, but compiler may generate warning that t is always bigger than 0
 		template <typename R, typename T>
 		constexpr bool in_range_unsigned_unsigned(const T t) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,R);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
 			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
 			    (t < static_cast<T>(std::numeric_limits<R>::max())) :
 			    (static_cast<R>(t) <std::numeric_limits<R>::max());
@@ -50,7 +53,7 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_signed_signed(const T t) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,R);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
 			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
 			    (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::max());
@@ -58,7 +61,7 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_signed_unsigned(const T t) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,R);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
 			return (t < T{ 0 }) ? false :
 			    (std::numeric_limits<T>::digits / 2 <= std::numeric_limits<R>::digits) ? true :
 			    (t <= static_cast<T>(std::numeric_limits<R>::max()));
@@ -66,7 +69,7 @@ namespace safeintegralop {
 
 		template <typename R, typename T>
 		constexpr bool in_range_unsigned_signed(const T t) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,R);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
 			return (std::numeric_limits<T>::digits >= std::numeric_limits<R>::digits / 2) ? (t <= static_cast<T>(std::numeric_limits<R>::max())) : true;
 		}
 
@@ -83,32 +86,32 @@ namespace safeintegralop {
 		// equivalent of operator== for different integral types
 		template <typename T, typename U>
 		constexpr bool cmp_equal_same_sign(const T t, const U u) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,U);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,U);
 			return (std::numeric_limits<T>::digits>std::numeric_limits<U>::digits) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_equal_signed_unsigned(const T t, const U u) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,U);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,U);
 			return (t<T{ 0 }) ? false : (std::numeric_limits<T>::digits / 2>std::numeric_limits<U>::digits) ? (t == static_cast<T>(u)) : (static_cast<U>(t) == u);
 		}
 
 		// equivalent of operator< for different integral types
 		template <typename T, typename U>
 		constexpr bool cmp_less_same_sign(const T t, const U u) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,U);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,U);
 			return (std::numeric_limits<T>::digits>std::numeric_limits<U>::digits) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_signed_unsigned(const T t, const U u) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,U);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,U);
 			return (t<T{ 0 }) ? true : (std::numeric_limits<T>::digits / 2>std::numeric_limits<U>::digits) ? (t < static_cast<T>(u)) : (static_cast<U>(t) < u);
 		}
 
 		template <typename T, typename U>
 		constexpr bool cmp_less_unsigned_signed(const T t, const U u) noexcept {
-			FEK_ASSERT_INTEGRALS_NOT_BOOL_TYPE(T,U);
+			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,U);
 			return (u<U{ 0 }) ? false : (std::numeric_limits<U>::digits / 2>std::numeric_limits<T>::digits) ? (static_cast<U>(t) < u) : (t < static_cast<T>(u));
 		}
     } // end details
