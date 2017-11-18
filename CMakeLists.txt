@@ -23,6 +23,7 @@ set (PROJ1_VERSION_MINOR 1)
 set(SOURCE_FILES
 	safeintegral/safeintegral.hpp
 	safeintegral/safeintegralop.hpp
+	safeintegral/safeintegralop_cmp.hpp
 )
 
 ##########################################################
