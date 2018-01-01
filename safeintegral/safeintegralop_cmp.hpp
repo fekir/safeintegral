@@ -47,16 +47,16 @@ namespace safeintegralop {
 		constexpr bool in_range_unsigned_unsigned(const T t) noexcept {
 			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
 			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
-			    (t < static_cast<T>(std::numeric_limits<R>::max())) :
-			    (static_cast<R>(t) <std::numeric_limits<R>::max());
+			    (t <= static_cast<T>(std::numeric_limits<R>::max())) :
+			    (static_cast<R>(t) <= std::numeric_limits<R>::max());
 		}
 
 		template <typename R, typename T>
 		constexpr bool in_range_signed_signed(const T t) noexcept {
 			FEK_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T,R);
-			return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
-			    (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
-			    (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::max());
+		return (std::numeric_limits<T>::digits > std::numeric_limits<R>::digits) ?
+		        (t <= static_cast<T>(std::numeric_limits<R>::max()) && t >= static_cast<T>(std::numeric_limits<R>::min())) :
+		        (static_cast<R>(t) <= std::numeric_limits<R>::max() && static_cast<R>(t) >= std::numeric_limits<R>::min());
 		}
 
 		template <typename R, typename T>
