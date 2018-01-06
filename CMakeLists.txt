@@ -23,6 +23,7 @@ set (PROJ1_VERSION_MINOR 1)
 set(SOURCE_FILES
 	safeintegral/safeintegral.hpp
 	safeintegral/safeintegralop.hpp
+	safeintegral/safeintegralop2.hpp
 	safeintegral/safeintegralop_cmp.hpp
 	safeintegral/errors.hpp
 )
@@ -31,11 +32,17 @@ set(SOURCE_FILES
 # Test settings
 
 set(TEST_FILES
-	
 	test/testlongint.cpp
 )
 
 add_executable(${PROJECT_NAME}Test test/maintest.cpp
 	${SOURCE_FILES} ${TEST_FILES}
 )
-set_property(TARGET ${PROJECT_NAME}Test PROPERTY CXX_STANDARD 11)
+
+option(COMPILE17 "compile with c++17 support" ON)
+
+if(COMPILE17)
+	set_property(TARGET ${PROJECT_NAME}Test PROPERTY CXX_STANDARD 17)
+else()
+	set_property(TARGET ${PROJECT_NAME}Test PROPERTY CXX_STANDARD 11)
+endif()

@@ -8,8 +8,6 @@ set(SanValue "SANUNDEF" CACHE STRING
 
 set_property(CACHE SanValue PROPERTY STRINGS ${SanitizerValues})
 
-# language
-add_compile_options(-std=c++14)
 # default warnings
 add_compile_options(-Wall -Wextra -pedantic -Wmain -Wunreachable-code -Wunknown-pragmas)
 # multiple declaration, shadowing, undef
