@@ -34,14 +34,20 @@ namespace safeintegralop {
 			        !std::is_same<value_type,char16_t>::value && !std::is_same<value_type,char32_t>::value &&
 			        !std::is_same<value_type,wchar_t>::value && std::is_integral<T>::value;
 		}
-#if defined(SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR) || defined(SAFE_INTEGRAL_OP_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE) || defined(SAFE_INTEGRAL_OP_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE)
+#if defined(SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR) || defined(SAFE_INTEGRAL_OP_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE) || \
+	    defined(SAFE_INTEGRAL_OP_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE) || defined(SAFE_INTEGRAL_OP_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE3)
 #error "One of the \"SAFE_INTEGRAL_OP_..._INTEGRAL_NOT_BOOL_CHAR_...\" macros has been already defined elsewhere!"
 #endif
 #define SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR " needs to be an integral (not bool or char/wchar_t) value type"
-#define SAFE_INTEGRAL_OP_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T) static_assert(is_integral_not_bool_char<T>(), #T SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
+#define SAFE_INTEGRAL_OP_ASSERT_INTEGRAL_NOT_BOOL_CHAR_TYPE(T) \
+	static_assert(safeintegralop::details::is_integral_not_bool_char<T>(), #T SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
 #define SAFE_INTEGRAL_OP_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE(T, R) \
-	static_assert(is_integral_not_bool_char<T>(), #T SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR);\
-	static_assert(is_integral_not_bool_char<R>(), #R SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
+	static_assert(safeintegralop::details::is_integral_not_bool_char<T>(), #T SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR);\
+	static_assert(safeintegralop::details::is_integral_not_bool_char<R>(), #R SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
+#define SAFE_INTEGRAL_OP_ASSERT_INTEGRALS_NOT_BOOL_CHAR_TYPE3(T, R, U) \
+	static_assert(safeintegralop::details::is_integral_not_bool_char<T>(), #T SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR);\
+	static_assert(safeintegralop::details::is_integral_not_bool_char<R>(), #R SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR);\
+	static_assert(safeintegralop::details::is_integral_not_bool_char<U>(), #U SAFE_INTEGRAL_OP_ERR_MSG_xxx_NEEDS_INTEGRAL_NOT_BOOL_CHAR)
 
 	}
 }
