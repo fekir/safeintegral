@@ -24,6 +24,7 @@ set(SOURCE_FILES
 	safeintegral/safeintegral.hpp
 	safeintegral/safeintegralop.hpp
 	safeintegral/safeintegralop_cmp.hpp
+	safeintegral/errors.hpp
 )
 
 ##########################################################
