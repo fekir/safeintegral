@@ -17,6 +17,10 @@
 #ifndef SAFEOPERATIONS_H
 #define SAFEOPERATIONS_H
 
+#if  __cplusplus > 201402L // compiling with c++17 or greater
+#include "safeintegralop2.hpp"
+#endif
+
 #include "errors.hpp"
 #include "safeintegralop_cmp.hpp"
 
